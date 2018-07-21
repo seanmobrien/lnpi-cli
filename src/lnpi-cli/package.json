@@ -1,0 +1,12 @@
+{
+  "name": "lnpi-cli",
+  "version": "0.0.0",
+  "description": "lnpi-cli",
+  "main": "app.js",
+  "author": {
+    "name": "seanm"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.87"
+  }
+}
