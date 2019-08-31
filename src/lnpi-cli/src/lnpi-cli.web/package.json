@@ -1,0 +1,9 @@
+{
+  "name": "lnpi-cli.web",
+  "version": "0.0.0",
+  "description": "lnpi-cli.web",
+  "main": "server.js",
+  "author": {
+    "name": ""
+  }
+}
