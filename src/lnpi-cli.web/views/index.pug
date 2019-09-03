@@ -1,0 +1,38 @@
+extends layout
+
+append body    
+    script(src='/javascripts/btcblockchaininfocontroller.js')
+    .container(ng-app='HelloWorldApp')
+        h1= title
+        .row
+            .col-md-12
+        .row
+            .col-md-4
+                span test
+            .col-md-4
+                span test2
+            .col-md-4(ng-controller='BtcBlockchainInfoController')
+                +panel-info("Blockchain Info")
+                  | 
+                  .row
+                    .col-md-2
+                        strong Chain
+                    .col-md-10
+                        span {{chain}}
+                  .row
+                    .col-md-2
+                        strong Headers
+                    .col-md-4
+                        span.badge {{downloadedHeaders}}
+                    .col-md-2
+                        strong Blocks
+                    .col-md-4
+                        span.badge {{downloadedBlocks}}
+                  .row
+                    .col-md-2
+                        strong Bytes
+                    .col-md-8
+                        span.badge {{sizeOnDisk}}               
+        .row
+            .col-md-12
+                span footer        
