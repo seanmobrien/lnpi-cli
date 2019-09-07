@@ -31,6 +31,7 @@
   <ItemGroup>
     <Compile Include="app.js" />
     <Compile Include="public\javascripts\btcblockchaininfocontroller.js" />
+    <Compile Include="routes\peer.js" />
     <Compile Include="services\config\defaults.js" />
     <Compile Include="services\config\develop.js">
       <SubType>Code</SubType>
@@ -52,9 +53,10 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
-    <Content Include="public\stylesheets\style.css" />
+    <Content Include="public\stylesheets\site.css" />
     <Content Include="README.md" />
     <Content Include="views\error.pug" />
+    <Content Include="views\peer.pug" />
     <Content Include="views\themepad.pug" />
     <Content Include="views\index.pug" />
     <Content Include="views\layout.pug" />

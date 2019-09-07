@@ -1,10 +1,10 @@
 ﻿'option strict';
 
-angular.module('HelloWorldApp', [])
+angular.module('LnPiCliApp', [])
   .controller('BtcBlockchainInfoController',
     function ($scope, $http) {
       // setup scope
-      $scope.isLoading = true;
+      $scope.is_loading = true;
       $scope.chain = 'Loading...';
 
       $http.get('/api/btc/')
@@ -24,22 +24,23 @@ angular.module('HelloWorldApp', [])
           } else {
             $scope.error = "Kaboom!";
           }
-          $scope.isLoading = false;
+          $scope.is_loading = false;
         });
     }
-);
-
+)
+/*  ;
 angular.module('HelloWorldApp', [])
-  .controller('BtcBlockchainInfoController',
+*/
+  .controller('BtcPeerListController',
     function ($scope, $http) {
       // setup scope
-      $scope.isLoading = true;
-      $scope.chain = 'Loading...';
-
-      $http.get('/api/btc/')
+      $scope.is_loading = true;
+      $scope.peer_list = [];
+      $http.get('/api/btc/peer/list')
         .then(function (response) {
           if (response.status === 200) {
-            angular.extend($scope, response.data);
+            $scope.peer_list = response.data;
+            $scope.count = response.data.length;
             $scope.in_error = false;         
           } else {
             $scope.in_error = true;            

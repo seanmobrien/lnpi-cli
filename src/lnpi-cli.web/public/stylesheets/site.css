@@ -1,0 +1,4 @@
+label.hidden-md.hidden-lg::after
+{
+    content:':  '
+}

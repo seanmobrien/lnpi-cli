@@ -1,0 +1,38 @@
+extends layout
+
+append body    
+    script(src='/javascripts/btcblockchaininfocontroller.js')
+    .container(ng-app='LnPiCliApp')
+        h1 Peer #{id}
+        .row
+            .col-md-1
+                strong Address
+            .col-md-2
+                span #{addr}
+            .col-md-1
+                strong Bound To
+            .col-md-2
+                span #{addrbind}
+            .col-md-1
+                strong Version
+            .col-md-1
+                span #{subver}
+            .col-md-1
+                strong Since
+            .col-md-2
+                span #{moment(Date(conntime)).format('M/D/YY h:mm')}
+            .col-md-1
+                strong Sent
+            .col-md-1
+                span #{moment(Date(lastsend)).format('h:mm:ss')}
+            .col-md-1
+                strong Recieved
+            .col-md-1
+                span #{moment(Date(lastrecv)).format('h:mm:ss')}
+            .col-md-1
+                strong Ping
+            .col-md-1
+                span #{pingtime}
+        .row
+            .col-md-12
+                span footer        

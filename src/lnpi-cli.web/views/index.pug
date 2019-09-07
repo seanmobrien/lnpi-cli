@@ -2,15 +2,38 @@ extends layout
 
 append body    
     script(src='/javascripts/btcblockchaininfocontroller.js')
-    .container(ng-app='HelloWorldApp')
+    .container(ng-app='LnPiCliApp')
         h1= title
         .row
             .col-md-12
         .row
-            .col-md-4
+            .col-md-3
                 span test
-            .col-md-4
-                span test2
+            .col-md-5(ng-controller='BtcPeerListController')
+                +panel-info("Peers")
+                  |                   
+                  .row
+                    .col-md-12
+                        .row.hidden-xs.hidden-sm
+                            .col-md-4
+                                strong Address
+                            .col-md-3
+                                strong Version
+                            .col-md-3.hidden-xs.hidden-sm
+                                strong Is Relay
+                            //-.col-md-2
+                            //-    span &nbsp;
+                        .row(ng-repeat='peer in peer_list')
+                            .col-md-4
+                                label.hidden-md.hidden-lg Address
+                                span {{peer.addr}}
+                            .col-md-3
+                                label.hidden-md.hidden-lg Version
+                                span {{peer.subver}}
+                            .col-md-2.hidden-xs.hidden-sm
+                                span {{peer.relaytxes}}
+                            .col-md-2
+                                a(href='/peer/{{peer.id}}') Details
             .col-md-4(ng-controller='BtcBlockchainInfoController')
                 +panel-info("Blockchain Info")
                   | 
@@ -32,7 +55,7 @@ append body
                     .col-md-2
                         strong Bytes
                     .col-md-8
-                        span.badge {{size_on_disk}}               
+                        span.badge {{size_on_disk}}
         .row
             .col-md-12
                 span footer        

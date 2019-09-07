@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var peerRouter = require('./routes/peer');
 var apiBtcRouter = require('./routes/api/btc');
 
 var app = express();
@@ -28,6 +29,7 @@ app.use('/bundles/angular', express.static(path.join(__dirname, 'node_modules', 
 // routers
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/peer', peerRouter);
 app.use('/api/btc', apiBtcRouter);
 
 // catch 404 and forward to error handler
