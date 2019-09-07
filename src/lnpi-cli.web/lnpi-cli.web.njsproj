@@ -48,6 +48,9 @@
     <Compile Include="routes\index.js" />
     <Compile Include="routes\users.js" />
     <Compile Include="services\bitcoin\index.js" />
+    <Compile Include="test\BitcoinServiceTests.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Content Include="bin\www" />
     <Content Include="launch.json">
       <SubType>Code</SubType>
@@ -63,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
+    <Folder Include="test\" />
     <Folder Include="services\config\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
