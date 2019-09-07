@@ -4,8 +4,11 @@ var router = express.Router();
 var btcFactory = require('./../../services/bitcoin/index');
 
 router.get('/', function (req, res, next) {
-  var cliReq = btcFactory.getClientInstance()
-                         .getBlockchainInfo();
+  var cliReq = btcFactory.getClientInstance().getBlockchainInfo();
+  cliReq.then(function (value) { res.type('json').send(value); });
+});
+router.get('/peer/list', function (req, res, next) {
+  var cliReq = btcFactory.getClientInstance().getPeerInfo();
   cliReq.then(function (value) { res.type('json').send(value); });
 });
 

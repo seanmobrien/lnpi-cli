@@ -28,3 +28,25 @@ angular.module('HelloWorldApp', [])
         });
     }
 );
+
+angular.module('HelloWorldApp', [])
+  .controller('BtcBlockchainInfoController',
+    function ($scope, $http) {
+      // setup scope
+      $scope.isLoading = true;
+      $scope.chain = 'Loading...';
+
+      $http.get('/api/btc/')
+        .then(function (response) {
+          if (response.status === 200) {
+            angular.extend($scope, response.data);
+            $scope.in_error = false;         
+          } else {
+            $scope.in_error = true;            
+            $scope.error = "Kaboom!";
+          }
+          $scope.is_loading = false;
+        });
+    }
+  );
+
