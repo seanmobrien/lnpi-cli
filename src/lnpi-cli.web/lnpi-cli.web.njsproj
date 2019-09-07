@@ -46,7 +46,6 @@
     </Compile>
     <Compile Include="routes\index.js" />
     <Compile Include="routes\users.js" />
-    <Compile Include="server.js" />
     <Compile Include="services\bitcoin\index.js" />
     <Content Include="bin\www" />
     <Content Include="launch.json">
