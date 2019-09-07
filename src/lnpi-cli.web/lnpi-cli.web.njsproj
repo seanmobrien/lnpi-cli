@@ -30,7 +30,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
-    <Compile Include="public\javascripts\BtcBlockchainInfoControllers.js" />
+    <Compile Include="public\javascripts\btcblockchaininfocontroller.js" />
     <Compile Include="services\config\defaults.js" />
     <Compile Include="services\config\develop.js">
       <SubType>Code</SubType>
