@@ -234,7 +234,12 @@ module.exports = (function () {
         return new Promise(function (resolve, reject) {
           shellJs.exec('bitcoin-cli ' + args, function (code, stdout, stderr) {
             if (code === 0) {
-              resolve(stdout);
+              try {
+                var data = JSON.parse(stdout);
+                resolve(data);
+              } catch (e) {
+                reject(e);
+              }              
             } else {
               reject(stderr);
             }
