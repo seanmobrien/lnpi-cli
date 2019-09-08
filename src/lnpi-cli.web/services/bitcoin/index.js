@@ -7,7 +7,7 @@ var _ = require("lodash");
 var shellJs = require("shelljs");
 var config = require('../../services/config/index');
 
-module.exports = (function () {
+var fnGetClientInstance = (function () {
   "use strict";
   function bitcoinClient() {
   }
@@ -101,21 +101,29 @@ module.exports = (function () {
             "addr": 640,
             "feefilter": 32,
             "getaddr": 24,
-            "getdata": 3295, "getheaders": 1053,
+            "getdata": 3295,
+            "getheaders": 1053,
             "ping": 448,
-            "pong": 608, "reject": 350,
+            "pong": 608,
+            "reject": 350,
             "sendcmpct": 66,
             "sendheaders": 24,
-            "verack": 24, "version": 126
+            "verack": 24,
+            "version": 126
           },
           "bytesrecv_per_msg": {
             "addr": 30717,
             "feefilter": 32,
             "getheaders": 1053,
-            "headers": 673, "inv": 305853, "notfound": 865,
+            "headers": 673,
+            "inv": 305853,
+            "notfound": 865,
             "ping": 608,
-            "pong": 448, "sendcmpct": 66, "sendheaders": 24,
-            "tx": 19882, "verack": 24,
+            "pong": 448,
+            "sendcmpct": 66,
+            "sendheaders": 24,
+            "tx": 19882,
+            "verack": 24,
             "version": 126
           }
         },
@@ -258,9 +266,157 @@ module.exports = (function () {
     ? makeMockIFace()
     : makeProdIFace());
 
-  return {
-    getClientInstance: function () {
-      return new bitcoinClient();
-    }
-  };
+  /********************************************
+  * Creates a new bitcoin core client instance
+  * @returns {bitcoinClient}
+  *********************************************/
+  return function () {
+    return new bitcoinClient();
+  };  
 })();
+
+var IpEndPoint = (function () {
+  /**
+   * IpEndPoint attaches to an ip endpoint (host+port)
+   * @class
+   */
+  function ipEndPoint() {
+    var self = this,
+      _data = arguments.length > 0
+        ? (function parseData(input) {
+          var dr = { host: null, port: 0 };
+          var t = typeof input, n;
+          if (t === 'string') {
+            // TODO: How do we handle endpoints without ports?
+            var sep = input.lastIndexOf(':');
+            if (sep < 1) {
+              dr.host = input.trim();
+            } else {
+              n = Number.parseInt(input.substr(sep + 1));
+              if (!isNaN(n)) {
+                dr.port = n;
+              }
+              dr.host = input.substr(0, sep).trim();
+            }
+          } else if (t === 'object') {
+            if (input.port !== undefined) {
+              n = Number.parseInt(input.port);
+              if (!isNaN(n)) {
+                dr.port = n;
+              }
+            }
+            if (input.host !== undefined) {
+              dr.host = input.host;
+            }
+          } else {
+            console.error('Unexpected input passed to ipendpoint', { input: input, type: t });
+          }
+          return dr;
+        })(arguments[0])
+        : { host: null, port: 0 };
+    self._host = _data.host;
+    self._port = _data.port;
+  }
+
+  function fnToString() {
+    return this.isEmpty()
+      ? ''
+      : this._port > 0
+        ? (this._host || '') + ':' + this._port
+        : this._host;
+  } 
+
+  /**
+   * Checks if this is an empty IpEndPoint
+   * @returns {boolean} true if this is an empty endpoint
+   */
+  ipEndPoint.prototype.isEmpty = function () {
+    return this._host === null && this._port < 1;
+  };
+  /**
+   * Builds a string representation of this instance
+   * @returns {string} String representation of instance.
+   */
+  ipEndPoint.prototype.toString = fnToString;
+  /**
+   * Builds a JSON representation of this instance
+   * @returns {string} JSON representation of instance.
+   */
+  ipEndPoint.prototype.toJSON = fnToString;
+  /**
+   * Returns the host portion of this endpoint
+   * @returns {string} Endpoint host
+   */
+  ipEndPoint.prototype.host = function () {
+    return this._host;
+  };
+  /**
+   * Returns the port portion of this endpoint
+   * @returns {Number} Endpoint port
+   */
+  ipEndPoint.prototype.port = function () {
+    return this._port < 1 ? NaN : this._port;
+  };
+
+  return ipEndPoint;
+})();
+
+var PeerInfo = (function () {
+  /**
+   * PeerInfo attaches to getpeerinfo data 
+   * @class
+   */
+  function peerInfo() {
+    var self = this;
+    if (arguments.length > 0) {
+      _.merge(self, arguments[0]);
+      _.each(['addr', 'addrlocal', 'addrbind'], function (key) {
+        var v = self[key];
+        if (v != null) {
+          self[key] = new IpEndPoint(v);
+        }
+      });
+
+    }
+  }
+
+  return peerInfo;
+})();
+/*
+  "id": 3,
+  "addr": "167.99.174.6:8333",
+  "addrlocal": "5.199.130.188:43546",
+  "addrbind": "127.0.0.1:50020",
+  "services": "000000000000040d",
+  "relaytxes": true, "lastsend": 1567555915,
+  "lastrecv": 1567555915, "bytessent": 6690,
+  "bytesrecv": 360371,
+  "conntime": 1567553727, "timeoffset": -26,
+  "pingtime": 0.312365,
+  "minping": 0.309642,
+  "version": 70015,
+  "subver": "/Satoshi:0.17.1/",
+  "inbound": false,
+  "addnode": false,
+  "startingheight": 593137,
+  "banscore": 0,
+  "synced_headers": 593140,
+  "synced_blocks": 593133,
+  "inflight": [
+  ],
+  "whitelisted": false,
+  "minfeefilter": 0.00001000,
+  "bytessent_per_msg": {
+    "version": 126
+  },
+  "bytesrecv_per_msg": {
+    "addr": 30717,        
+  }
+ */ 
+module.exports = {
+  util: {
+    IpEndPoint: IpEndPoint,
+    PeerInfo: PeerInfo
+  },
+  getClientInstance: fnGetClientInstance
+};

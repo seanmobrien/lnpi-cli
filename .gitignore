@@ -329,4 +329,8 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
+# Visual Studio Code control files
+.vscode/
+
+# Local launch debug shell script
 src/lnpi-cli.web/launch-debug.sh
