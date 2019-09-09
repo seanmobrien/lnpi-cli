@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Bitcoin client wrapper used to query bitcoin-core 
  * 
  */
@@ -149,7 +149,7 @@ var fnGetClientInstance = (function () {
           "startingheight": 593137,
           "banscore": 0, "synced_headers": 593140,
           "synced_blocks": 593133,
-          "inflight": [],                                                         
+          "inflight": [],
           "whitelisted": false,
           "minfeefilter": 0.00001000,
           "bytessent_per_msg": {
@@ -177,7 +177,7 @@ var fnGetClientInstance = (function () {
             "verack": 24,
             "version": 126
           }
-        }, 
+        },
         {
           "id": 32,
           "addr": "218.145.29.195:8333",
@@ -247,7 +247,7 @@ var fnGetClientInstance = (function () {
                 resolve(data);
               } catch (e) {
                 reject(e);
-              }              
+              }
             } else {
               reject(stderr);
             }
@@ -260,7 +260,7 @@ var fnGetClientInstance = (function () {
       getBlockchainInfo: makeBitcoinShellCommand('getblockchaininfo'),
       getPeerInfo: makeBitcoinShellCommand('getpeerinfo')
     };
-  } 
+  }
   // Use either live or mock interface definitions based on btc.use_shim setting
   _.merge(bitcoinClient.prototype, config.btc.use_shim
     ? makeMockIFace()
@@ -272,7 +272,7 @@ var fnGetClientInstance = (function () {
   *********************************************/
   return function () {
     return new bitcoinClient();
-  };  
+  };
 })();
 
 var IpEndPoint = (function () {
@@ -324,7 +324,7 @@ var IpEndPoint = (function () {
       : this._port > 0
         ? (this._host || '') + ':' + this._port
         : this._host;
-  } 
+  }
 
   /**
    * Checks if this is an empty IpEndPoint
@@ -361,6 +361,100 @@ var IpEndPoint = (function () {
   return ipEndPoint;
 })();
 
+/*
+* MessageSizeDictionary class contains bytes used by various messages
+* @class
+*/
+var MessageSizeDictionary = (function () {
+  function messageSizeDictionary() {
+    var self = this;
+    if (arguments.length > 0 && arguments[0] != null) {
+      _.each(arguments[0], function (v, k) {
+        var vBuf = Number.parseInt(v);
+        if (!isNaN(vBuf)) {
+          self[k] = vBuf;
+        }
+      });
+    }
+  }
+
+  /*
+  * Adds the specified number of bytes to a message, optionally 
+  * overwriting the existing value.
+  * @param {string} msg - Name of the message bytes are added to.
+  * @param {number} bytes - Number of bytes to add.
+  * @param {boolean} [overwrite=false] - If true, any previous value will be overwritten.
+  * @returns {number} New value for the specified message.
+  */
+  messageSizeDictionary.prototype.add = function (msg, bytes, overwrite) {
+    if (typeof msg !== 'string') {
+      throw new Error("Message name is a required argument");
+    }
+    msg = msg.trim();
+    bytes = Number.parseInt(bytes);
+    if (isNaN(bytes)) {
+      throw new Error('bytes must be numeric value');
+    }
+    if (new Boolean(overwrite) === true) {
+      this[msg] = bytes;
+    } else {
+      var current = this[msg] || 0;
+      this[msg] = (current + bytes);
+      bytes = this[msg];
+    }
+    return bytes;
+  };
+  /*
+  * Determines whether a message is in the dictionary. 
+  * @param {string} key - Message key to look for.
+  * @returns {boolean} true if the given key is present, otherwise false.
+  */
+  messageSizeDictionary.prototype.contains = function (key) {
+    return !isNaN(this[key]);
+  };
+  /*
+  * Returns total number of bytes consumed by the specified message types.
+  * @param {string} msg - Comma-deliminted Name of message to lookup.
+  * @returns {number} Number of bytes used for this message type.
+  */
+  messageSizeDictionary.prototype.get = function (msg) {
+    var nBuf;
+    if (typeof msg === 'string') {
+      // Were we passed multiple comma-delimited messages?
+      var parts = msg.split(',');
+      return this.get(parts);
+    } else if (Array.isArray(msg)) {
+      // Otherwise let's assume we have an arary
+      var arrBuf = 0;
+      for (var idx = 0; idx < msg.length; idx++) {
+        nBuf = Number.parseInt(this[msg[idx]]);
+        if (!isNaN(nBuf)) {
+          arrBuf += nBuf;
+        }
+      }
+      nBuf = arrBuf;
+    } else {
+      // Catch-all
+      nBuf = 0;
+    }
+    return nBuf;
+  };
+  /*
+  * Returns total number of message types contained in this dictionary.
+  * @returns {Number} Number of messages in this dictionary.
+  */
+  messageSizeDictionary.prototype.length = function () {
+    var ret = 0;
+    _.each(this, v => {
+      if (!isNaN(v)) {
+        ret++;
+      }
+    });
+    return ret;
+  };
+  return messageSizeDictionary;
+})();
+
 var PeerInfo = (function () {
   /**
    * PeerInfo attaches to getpeerinfo data 
@@ -370,13 +464,20 @@ var PeerInfo = (function () {
     var self = this;
     if (arguments.length > 0) {
       _.merge(self, arguments[0]);
-      _.each(['addr', 'addrlocal', 'addrbind'], function (key) {
-        var v = self[key];
-        if (v != null) {
-          self[key] = new IpEndPoint(v);
-        }
+      // Attach to complex child values
+      _.each([
+        { members: ['addr', 'addrlocal', 'addrbind'], factory: x => new IpEndPoint(x) },
+        { members: ['bytessent_per_msg', 'bytesrecv_per_msg'], factory: x => new MessageSizeDictionary(x) }
+      ], function (vtable) {
+        var factory = vtable.factory;
+        var members = typeof vtable.members === 'string' ? [vtable.members] : vtable.members;
+        _.each(members, function (key) {
+          var v = self[key];
+          if (v) {
+            self[key] = factory(v);
+          }
+        });
       });
-
     }
   }
 
@@ -412,10 +513,11 @@ var PeerInfo = (function () {
   "bytesrecv_per_msg": {
     "addr": 30717,        
   }
- */ 
+ */
 module.exports = {
   util: {
     IpEndPoint: IpEndPoint,
+    MessageSizeDictionary: MessageSizeDictionary,
     PeerInfo: PeerInfo
   },
   getClientInstance: fnGetClientInstance

@@ -54,6 +54,109 @@ it('getblockchaininfo should return chain data', function (done) {
     target.toString().should.equal(hostAndPort);
   });
 })();
+
+/*
+ * MessageSizeDictionary Class
+ * 
+ */
+(function () {
+
+  var testData = {
+    "version": 123,
+    "getheaders": 1053,
+    "ping": 20,
+    "number": "321"
+   },
+    expectedCount = 4;
+
+  function createTarget() {
+    var args = _.merge({}, testData, arguments.length === 0 ? {} : arguments[0]);
+    return new btc.util.MessageSizeDictionary(args);
+  }
+
+  it('MessageSizeDictionary constructor copies valid values', function () {
+    var target = createTarget();
+    target.length().should.equal(expectedCount);
+  });
+  it('MessageSizeDictionary constructor ignores invalid values', function () {
+    var target = createTarget({"badvalue": "not a string"});
+    target.length().should.equal(expectedCount);
+  });
+  it('MessageSizeDictionary constructor converts into numeric', function () {
+    var target = createTarget();
+    target.number.should.equal(321);
+  });
+  it('MessageSizeDictionary::add new key adds new value', function () {
+    var target = createTarget(),
+      key = "new_key",
+      val = 123;
+    target.add(key, val).should.equal(val);
+    target.length().should.equal(expectedCount + 1);
+  });
+  it('MessageSizeDictionary::add existing key updates value', function () {
+    var target = createTarget(),
+      key = "version",
+      val = 123,
+      expected_val = 246;
+    target.add(key, val).should.equal(expected_val);
+    target.length().should.equal(expectedCount);
+  });
+  it('MessageSizeDictionary::get existing key returns expected value', function () {
+    var target = createTarget(),
+      key = "version",
+      expected_val = 123;
+    target.get(key).should.equal(expected_val);
+  });
+  it('MessageSizeDictionary::get missing key returns expected value', function () {
+    var target = createTarget(),
+      key = "not-there",
+      expected_val = 0;
+    target.get(key).should.equal(expected_val);
+  });
+  it('MessageSizeDictionary::get multiple keys returns sum', function () {
+    var target = createTarget(),
+      key = "version,ping",
+      expected_val = 143;
+    target.get(key).should.equal(expected_val);
+  });
+})();
+
+/*
+ * NodeServiceFlag
+ *
+
+(function () {
+
+  function createTarget() {
+    var v = 0;
+    for (var idx = 0; idx < arguments.length; idx++) {
+      v = v | arguments[idx];
+    }
+    return new btc.util.NodeServiceFlags(v);
+  }
+
+  it('NodeServiceFlag::get retrieves services', function () {
+    var target = createTarget(
+      btc.globals.ServiceIdentifier.NODE_GETUTXO,
+      btc.globals.ServiceIdentifier.NODE_WITNESS,
+      btc.globals.ServiceIdentifier.NODE_NETWORK
+    );
+    target.get(btc.globals.ServiceIdentifier.NODE_GETUTXO).should.be.true;
+    target.get(btc.globals.ServiceIdentifier.NODE_WITNESS).should.be.true;
+    target.get(btc.globals.ServiceIdentifier.NODE_NETWORK).should.be.true;
+    target.get(btc.globals.ServiceIdentifier.NODE_BLOOM).should.be.false;
+  });
+  it('NodeServiceFlag::all retrieves services', function () {
+    var target = createTarget(
+      btc.globals.ServiceIdentifier.NODE_GETUTXO,
+      btc.globals.ServiceIdentifier.NODE_WITNESS,
+      btc.globals.ServiceIdentifier.NODE_NETWORK
+    );
+    var services = target.all();
+    services.length.should.be.equal(3);
+  });
+})();
+ */
 /*
  * PeerInfo Class
  * 
@@ -107,12 +210,23 @@ it('getblockchaininfo should return chain data', function (done) {
       target._port.should.equal(arguments[2], 'Port value mismatch detected.');
     }
   }
+  function assertIsMessageDictionary(target) {
+    expect(target).to.be.not.null;
+    var count = target.length();
+    count.should.not.equal(0);    
+  }
   it('PeerInfo class should parse endpoints', function () {
     var target = new btc.util.PeerInfo(peerInfoData());
     // We have 3 ip endpoints to worry about
     assertIsIpEndPoint(target.addr);
     assertIsIpEndPoint(target.addrlocal);
     assertIsIpEndPoint(target.addrbind);
+  });
+  it('PeerInfo class should parse message dictionary', function () {
+    var target = new btc.util.PeerInfo(peerInfoData());
+    // We have 3 ip endpoints to worry about
+    assertIsMessageDictionary(target.bytessent_per_msg);
+    assertIsMessageDictionary(target.bytesrecv_per_msg);
   });
 
 })();
