@@ -374,7 +374,7 @@ var NodeSupportedServices = (function () {
     var initialValue = 0;
     if (arguments.length > 0) {
       switch (typeof arguments[0]) {
-        case 'string':                  
+        case 'string':
           initialValue = new Number('0x' + arguments[0]).valueOf();
           break;
         case 'number':
@@ -396,7 +396,7 @@ var NodeSupportedServices = (function () {
           console.warn('unexpected object passed to NodeSupportedServices constructor', { input: arguments });
           break;
       }
-    } 
+    }
     /**    
     * @field {number} Instance value
     */
@@ -415,11 +415,11 @@ var NodeSupportedServices = (function () {
     /** Full node capable of responding to a getutxo protocol request */
     NODE_GETUTXO: 0x0002,
     /** Full node willing and capable of fulfilling bloom requests */
-    NODE_BLOOM:  0x0004,
+    NODE_BLOOM: 0x0004,
     /** Full node that can be asked for segregated witness data */
-    NODE_WITNESS:  0x0008,
+    NODE_WITNESS: 0x0008,
     /** Full node that supports Xtreme Thinblocks. */
-    NODE_XTHIN:  0x0010,
+    NODE_XTHIN: 0x0010,
     /** Same as NODE_NETWORK, but has at least the last 288 blocks.  See BIP159 for additional details. */
     NODE_NETWORK_LIMITED: 0x0400
   };
@@ -444,8 +444,29 @@ var NodeSupportedServices = (function () {
     /** Same as NODE_NETWORK, but has at least the last 288 blocks.  See BIP159 for additional details. **/
     NetworkLimited: 'NetworkLimited'
   };
-  
-  
+  /**
+  * Returns a description for a given @typeref {nodeSupportedServices} value.
+  * @param {nodeSupportedServices.NodeSupportedServiceFlag} service - The service flag to describe.
+  * @returns {string} Description for flag.
+  */
+  nodeSupportedServices.describeServiceFlag = function (service) {
+    switch (service) {
+      case nodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK:
+        return nodeSupportedServices.NodeSupportedServiceName.Network;
+      case nodeSupportedServices.NodeSupportedServiceFlag.NODE_BLOOM:
+        return nodeSupportedServices.NodeSupportedServiceName.Bloom;
+      case nodeSupportedServices.NodeSupportedServiceFlag.NODE_GETUTXO:
+        return nodeSupportedServices.NodeSupportedServiceName.GetUtxo;
+      case nodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK_LIMITED:
+        return nodeSupportedServices.NodeSupportedServiceName.NetworkLimited;
+      case nodeSupportedServices.NodeSupportedServiceFlag.NODE_WITNESS:
+        return nodeSupportedServices.NodeSupportedServiceName.Witness;
+      case nodeSupportedServices.NodeSupportedServiceFlag.NODE_XTHIN:
+        return nodeSupportedServices.NodeSupportedServiceName.XtremeThin;
+      default:
+        return 'Unknown';
+    }
+  };  
   /**
   * Enumerates all node service types that this instance supports.
   * @returns {nodeSupportedServices.NodeSupportedServiceFlag[]} Array of supported service bits.
@@ -459,6 +480,7 @@ var NodeSupportedServices = (function () {
     });
     return ret;
   }
+ 
   /**
    * Builds a string representation of this instance
    * @returns {string} String representation of instance.
@@ -474,7 +496,7 @@ var NodeSupportedServices = (function () {
   function supports(service) {
     return new Boolean((this.value & service) === service);
   }
-
+ 
 
 
   _.merge(nodeSupportedServices.prototype, {

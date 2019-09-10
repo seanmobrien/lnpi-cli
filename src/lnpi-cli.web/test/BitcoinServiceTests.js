@@ -158,6 +158,37 @@ it('getblockchaininfo should return chain data', function (done) {
     services[0].should.be.equal(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK);
     services[1].should.be.equal(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_GETUTXO);
     services[2].should.be.equal(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_WITNESS);
+  });
+  it('NodeSupportedServices::describeServiceFlag returns expected value', function () {
+    function testValues(x, y) {
+      var buf = btc.util.NodeSupportedServices.describeServiceFlag(x);
+      buf.should.be.equal(y);
+    }
+    testValues(
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK,
+      btc.util.NodeSupportedServices.NodeSupportedServiceName.Network
+    );
+    testValues(
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_BLOOM,
+      btc.util.NodeSupportedServices.NodeSupportedServiceName.Bloom
+    );
+    testValues(
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_GETUTXO,
+      btc.util.NodeSupportedServices.NodeSupportedServiceName.GetUtxo
+    );
+    testValues(
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK_LIMITED,
+      btc.util.NodeSupportedServices.NodeSupportedServiceName.NetworkLimited
+    );
+    testValues(
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_WITNESS,
+      btc.util.NodeSupportedServices.NodeSupportedServiceName.Witness
+    );
+    testValues(
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_XTHIN,
+      btc.util.NodeSupportedServices.NodeSupportedServiceName.XtremeThin
+    );
+
   });  
 })();
 /*
