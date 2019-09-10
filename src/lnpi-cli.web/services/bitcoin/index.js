@@ -275,6 +275,10 @@ var fnGetClientInstance = (function () {
   };
 })();
 
+/**
+* IpEndPoint attaches to an ip endpoint (host+port)
+* @class
+*/
 var IpEndPoint = (function () {
   /**
    * IpEndPoint attaches to an ip endpoint (host+port)
@@ -360,6 +364,129 @@ var IpEndPoint = (function () {
 
   return ipEndPoint;
 })();
+
+/**
+* NodeSupportedServices helps enumerate a node service bitmask
+* @class
+*/
+var NodeSupportedServices = (function () {
+  function nodeSupportedServices() {
+    var initialValue = 0;
+    if (arguments.length > 0) {
+      switch (typeof arguments[0]) {
+        case 'string':                  
+          initialValue = new Number('0x' + arguments[0]).valueOf();
+          break;
+        case 'number':
+          initialValue = arguments[0];
+          break;
+        case 'object':
+          if (arguments[0] === null) {
+            initialValue = 0;
+          } else {
+            // Copy constructor
+            if (typeof arguments[0].value === 'number') {
+              initialValue = arguments[0].value;
+            } else {
+              console.warn('unexpected object passed to NodeSupportedServices constructor', { input: arguments });
+            }
+          }
+          break;
+        default:
+          console.warn('unexpected object passed to NodeSupportedServices constructor', { input: arguments });
+          break;
+      }
+    } 
+    /**    
+    * @field {number} Instance value
+    */
+    this.value = initialValue;
+  }
+  /**
+  * Node Supported Service flags
+  * @readonly
+  * @enum {number}
+  */
+  nodeSupportedServices.NodeSupportedServiceFlag = {
+    /** Unnamed */
+    Unnamed: 0x0,
+    /** Full node that can be asked for blocks. */
+    NODE_NETWORK: 0x0001,
+    /** Full node capable of responding to a getutxo protocol request */
+    NODE_GETUTXO: 0x0002,
+    /** Full node willing and capable of fulfilling bloom requests */
+    NODE_BLOOM:  0x0004,
+    /** Full node that can be asked for segregated witness data */
+    NODE_WITNESS:  0x0008,
+    /** Full node that supports Xtreme Thinblocks. */
+    NODE_XTHIN:  0x0010,
+    /** Same as NODE_NETWORK, but has at least the last 288 blocks.  See BIP159 for additional details. */
+    NODE_NETWORK_LIMITED: 0x0400
+  };
+  /**
+  * Node Supported Service names
+  * @readonly
+  * @enum {number}
+  */
+  nodeSupportedServices.NodeSupportedServiceName = {
+    /** Unnamed **/
+    Unnamed: 'Unnamed',
+    /** Full node that can be asked for blocks. **/
+    Network: 'Network',
+    /** Full node capable of responding to a getutxo protocol request **/
+    GetUtxo: 'GetUTXO',
+    /** Full node willing and capable of fulfilling bloom requests **/
+    Bloom: 'Bloom',
+    /** Full node that can be asked for segregated witness data **/
+    Witness: 'SegWit',
+    /** Full node that supports Xtreme Thinblocks. **/
+    XtremeThin: 'XtremeThinblocks',
+    /** Same as NODE_NETWORK, but has at least the last 288 blocks.  See BIP159 for additional details. **/
+    NetworkLimited: 'NetworkLimited'
+  };
+  
+  
+  /**
+  * Enumerates all node service types that this instance supports.
+  * @returns {nodeSupportedServices.NodeSupportedServiceFlag[]} Array of supported service bits.
+  */
+  function all(){
+    var check = this.value, ret = [];
+    _.each(nodeSupportedServices.NodeSupportedServiceFlag, x => {
+      if (x > 0 && (check & x) === x) {
+        ret.push(x);
+      }
+    });
+    return ret;
+  }
+  /**
+   * Builds a string representation of this instance
+   * @returns {string} String representation of instance.
+   */
+  function fnToString() {
+    return this.value.toString(16);
+  }
+  /**
+  * Determines if this instance supports the requested service.
+  * @param {nodeSupportedServices.NodeSupportedServiceFlag} service - The service to evaluate against.
+  * @returns {boolean} true if this instance supports the requested service.
+  */
+  function supports(service) {
+    return new Boolean((this.value & service) === service);
+  }
+
+
+
+  _.merge(nodeSupportedServices.prototype, {
+    all: all,
+    supports: supports,
+    toJSON: fnToString,
+    toString: fnToString
+  });
+
+  return nodeSupportedServices;
+})();
+
 
 /*
 * MessageSizeDictionary class contains bytes used by various messages
@@ -467,7 +594,8 @@ var PeerInfo = (function () {
       // Attach to complex child values
       _.each([
         { members: ['addr', 'addrlocal', 'addrbind'], factory: x => new IpEndPoint(x) },
-        { members: ['bytessent_per_msg', 'bytesrecv_per_msg'], factory: x => new MessageSizeDictionary(x) }
+        { members: ['bytessent_per_msg', 'bytesrecv_per_msg'], factory: x => new MessageSizeDictionary(x) },
+        { members: ['services'], factory: x => new NodeSupportedServices(x) }
       ], function (vtable) {
         var factory = vtable.factory;
         var members = typeof vtable.members === 'string' ? [vtable.members] : vtable.members;
@@ -518,6 +646,7 @@ module.exports = {
   util: {
     IpEndPoint: IpEndPoint,
     MessageSizeDictionary: MessageSizeDictionary,
+    NodeSupportedServices: NodeSupportedServices,
     PeerInfo: PeerInfo
   },
   getClientInstance: fnGetClientInstance

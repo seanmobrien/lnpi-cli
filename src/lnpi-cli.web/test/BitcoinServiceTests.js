@@ -124,7 +124,7 @@ it('getblockchaininfo should return chain data', function (done) {
 /*
  * NodeServiceFlag
  *
-
+ */
 (function () {
 
   function createTarget() {
@@ -132,31 +132,34 @@ it('getblockchaininfo should return chain data', function (done) {
     for (var idx = 0; idx < arguments.length; idx++) {
       v = v | arguments[idx];
     }
-    return new btc.util.NodeServiceFlags(v);
+    return new btc.util.NodeSupportedServices(v);
   }
 
-  it('NodeServiceFlag::get retrieves services', function () {
+  it('NodeSupportedServices::supports retrieves services', function () {
     var target = createTarget(
-      btc.globals.ServiceIdentifier.NODE_GETUTXO,
-      btc.globals.ServiceIdentifier.NODE_WITNESS,
-      btc.globals.ServiceIdentifier.NODE_NETWORK
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_GETUTXO,
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_WITNESS,
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK
     );
-    target.get(btc.globals.ServiceIdentifier.NODE_GETUTXO).should.be.true;
-    target.get(btc.globals.ServiceIdentifier.NODE_WITNESS).should.be.true;
-    target.get(btc.globals.ServiceIdentifier.NODE_NETWORK).should.be.true;
-    target.get(btc.globals.ServiceIdentifier.NODE_BLOOM).should.be.false;
+    target.supports(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_GETUTXO).should.be.true;
+    target.supports(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_WITNESS).should.be.true;
+    target.supports(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK).should.be.true;
+    target.supports(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_BLOOM).should.be.false;
   });
-  it('NodeServiceFlag::all retrieves services', function () {
+  
+  it('NodeSupportedServices::all retrieves services', function () {
     var target = createTarget(
-      btc.globals.ServiceIdentifier.NODE_GETUTXO,
-      btc.globals.ServiceIdentifier.NODE_WITNESS,
-      btc.globals.ServiceIdentifier.NODE_NETWORK
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_GETUTXO,
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_WITNESS,
+      btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK
     );
     var services = target.all();
     services.length.should.be.equal(3);
-  });
+    services[0].should.be.equal(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_NETWORK);
+    services[1].should.be.equal(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_GETUTXO);
+    services[2].should.be.equal(btc.util.NodeSupportedServices.NodeSupportedServiceFlag.NODE_WITNESS);
+  });  
 })();
- */
 /*
  * PeerInfo Class
  * 
@@ -215,6 +218,11 @@ it('getblockchaininfo should return chain data', function (done) {
     var count = target.length();
     count.should.not.equal(0);    
   }
+  function assertIsNodeServices(target) {
+    expect(target).to.be.not.null;
+    var vType = typeof target.value;
+    vType.should.equal('number');
+  }
   it('PeerInfo class should parse endpoints', function () {
     var target = new btc.util.PeerInfo(peerInfoData());
     // We have 3 ip endpoints to worry about
@@ -227,6 +235,11 @@ it('getblockchaininfo should return chain data', function (done) {
     // We have 3 ip endpoints to worry about
     assertIsMessageDictionary(target.bytessent_per_msg);
     assertIsMessageDictionary(target.bytesrecv_per_msg);
+  });
+  it('PeerInfo class should parse node services', function () {
+    var target = new btc.util.PeerInfo(peerInfoData());
+    // We have 3 ip endpoints to worry about
+    assertIsNodeServices(target.services);
   });
 
 })();
